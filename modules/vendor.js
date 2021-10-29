@@ -3,18 +3,42 @@
 const events = require('../util/event-pool.js');
 const faker = require('faker');
 
-// delivery variable <- store, orderID, customer, address
+// MODELS
+events.on('pickup', (payload) => logEvent('pickup', payload))
+events.on('in-transit', (payload) => logEvent('in-transit', payload))
+events.on('delivered', (payload) => logEvent('delivered', payload))
+events.on('vendor-delivered', (payload) => vendorLogEvent( payload))
 
+let delivery = {
+  store: 'Best Store',
+  orderID: faker.datatype.uuid(),
+  customer: `${faker.name.firstName()} ${faker.name.lastName()}`,
+  addreess: `${faker.address.city()}, ${faker.address.state()}`,
+}
 
-// Runs whatever we want to whatever set interval
+let vendorDelivered = `VENDOR: Thank you for delivering ${delivery.orderID}`
+
 setInterval(() => {
-  let delivery = {
-    store: faker.company.companyName(),
-    orderID: faker.uuid(),
-    customer: `${faker.name.firstName()} ${faker.name.lastName()}`,
-    addreess: `${faker.address.city}, ${faker.address.state}`,
-  }
   events.emit('pickup', delivery)
 }, 5000)
 
-// listen for delivered event => handleDelivery
+setInterval(() => {
+  events.emit('vendor-delivered', vendorDelivered)
+}, 5500)
+
+// callback function
+function logEvent(event, payload) {
+  let loggedEvent = {
+    event: event,
+    time: new Date(),
+    payload: payload
+  }
+  console.log('EVENT',loggedEvent)
+}
+
+function vendorLogEvent(payload) {
+  console.log(payload)
+}
+
+module.exports = {logEvent, vendorLogEvent};
+
