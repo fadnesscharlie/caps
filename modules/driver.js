@@ -1,33 +1,19 @@
 'use strict';
 
-const events = require('../util/event-pool.js');
-const faker = require('faker');
+// connection to socket io as a client
+const io = require('socket.io-client');
 
-events.on('driver-pickup', (payload) => driverLogEvent( payload))
-events.on('driver-delivered', (payload) => driverLogEvent( payload))
+// connect to the hub
+const socket = io.connect('http://localhost:3000/caps');
 
-let delivery = {
-  store: 'Best Store',
-  orderID: faker.datatype.uuid(),
-  customer: `${faker.name.firstName()} ${faker.name.lastName()}`,
-  addreess: `${faker.address.city()}, ${faker.address.state()}`,
-}
+socket.on('pickup', (payload) => {
+  console.log('Driver picked up: ', payload.orderID)
+})
+  
+socket.on('in-transit', (payload) => {
+  console.log(`Driver has ${payload.orderID} in transit`)
+})
 
-let driverPickup = `DRIVER: picked up ${delivery.orderID}`
-let driverDelivered = `DRIVER: delivered ${delivery.orderID}`
-
-setInterval(() =>{
-  events.emit('driver-pickup', driverPickup)
-  events.emit('in-transit', delivery)
-  events.emit('driver-delivered', driverDelivered)
-}, 5250)
-
-setInterval(() =>{
-  events.emit('delivered', delivery)
-}, 5550)
-
-function driverLogEvent(payload) {
-  console.log(payload)
-}
-
-module.exports = driverLogEvent;
+socket.on('delivered', (payload) => {
+  console.log('Driver has delivered: ', payload.orderID)
+})

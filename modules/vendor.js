@@ -1,13 +1,12 @@
 'use strict';
 
-const events = require('../util/event-pool.js');
 const faker = require('faker');
 
-// MODELS
-events.on('pickup', (payload) => logEvent('pickup', payload))
-events.on('in-transit', (payload) => logEvent('in-transit', payload))
-events.on('delivered', (payload) => logEvent('delivered', payload))
-events.on('vendor-delivered', (payload) => vendorLogEvent( payload))
+const io = require('socket.io-client');
+const socket = io.connect('http://localhost:3000/caps');
+const process = require('process');
+
+const store = 'Harus Cakes';
 
 let delivery = {
   store: 'Best Store',
@@ -16,29 +15,17 @@ let delivery = {
   addreess: `${faker.address.city()}, ${faker.address.state()}`,
 }
 
-let vendorDelivered = `VENDOR: Thank you for delivering ${delivery.orderID}`
+let vendorDelivered = ` Thank you for delivering ${delivery.orderID}`
 
-setInterval(() => {
-  events.emit('pickup', delivery)
-}, 5000)
+socket.emit('join', store);
 
-setInterval(() => {
-  events.emit('vendor-delivered', vendorDelivered)
-}, 5500)
+socket.on('pickup', (payload) => {
+  console.log('You have an Item to ship: ', payload.orderID)
+})
 
-// callback function
-function logEvent(event, payload) {
-  let loggedEvent = {
-    event: event,
-    time: new Date(),
-    payload: payload
-  }
-  console.log('EVENT',loggedEvent)
-}
-
-function vendorLogEvent(payload) {
-  console.log(payload)
-}
-
-module.exports = {logEvent, vendorLogEvent};
-
+socket.on('delivered', (payload) => {
+  console.log('Delivered:', vendorDelivered)
+  process.on('exit', (code) => {
+    console.log(`Exiting with code: ${code}`)
+  })
+})
