@@ -1,21 +1,27 @@
 # The Code Academy Parcel Service
 
+## Author
+
+- Charlie Fadness
+
+## Starting
+
+Entering the command `npm run start` will start the server up. 
+
+- We need our `hub.js` file to run
+  - Then we need to have our `vendor.js`, `driver.js`, and `caps-api.js` to connect to our server and rooms as well as to see our console logs
+
+## Tests
+
+`npm run test` will run our tests
+
 ## About
 
-We are creating a event driven program that sends out a event listener request. This will wait for and run when those events listeners have triggered.
+We are creating a event driven program that sends out a event listener request. When we post something to our API, it will run **pickup**, **in-transit**, and/or **delivered** depending on what post request it gets. 
 
-## Things to do
+## UML
 
-- vendor
-  - Create a in transit emmit in Vendor
-  - Create a delivered emit in Vendor
-  -  Create an object to send to the /caps server and emit pickup
-
-- After Delivery Emit, exit with `process.exit()`
-
-- driver
-  - When pickup is emitted, simulate all driver things
-  - Have driver announce for in transit 
+![UML](img/UML-lab-11.png)
 
 ## Contributors
 
