@@ -4,9 +4,9 @@ const faker = require('faker');
 
 const io = require('socket.io-client');
 const socket = io.connect('http://localhost:3000/caps');
-const process = require('process');
 
 const store = 'Harus Cakes';
+const parcel = process.argv[2];
 
 let delivery = {
   store: 'Best Store',
@@ -19,13 +19,19 @@ let vendorDelivered = ` Thank you for delivering ${delivery.orderID}`
 
 socket.emit('join', store);
 
+
 socket.on('pickup', (payload) => {
   console.log('You have an Item to ship: ', payload.orderID)
+  socket.emit('new parcel', parcel)
 })
+
+// same as pickup
 
 socket.on('delivered', (payload) => {
   console.log('Delivered:', vendorDelivered)
-  process.on('exit', (code) => {
-    console.log(`Exiting with code: ${code}`)
-  })
+  socket.emit('getall');
+})
+
+socket.on('added', () => {
+  socket.disconnect();
 })
