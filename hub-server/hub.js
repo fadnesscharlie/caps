@@ -2,6 +2,7 @@
 
 // require (socket)(port)
 const io = require('socket.io')(3000);
+const uuid = require('uuid').v4;
 
 // on connection -> console log that connection
 io.on('connection', (socket) => {
@@ -10,6 +11,7 @@ io.on('connection', (socket) => {
 
 // lets create the namespace 'caps'
 const caps = io.of('/caps');
+const queue = { shipments: {} }
 
 // on connection to caps
 caps.on('connection', (socket) => {
@@ -24,11 +26,39 @@ caps.on('connection', (socket) => {
 
   // pick up event
   // Locally picks up socket
-  socket.on('pickup', (payload) => {
-    logger('pickup', payload);
+  socket.on('pickup', (parcel) => {
+    logger('pickup', parcel);
+    // set messsageID to uuid
+    let parcelID = uuid();
+    // to the queue
+    // in the message queue @ 'pickup', driver, mesage = message.payload
+    queue.shipments[parcelID] = parcel
+    // console.log('queue ',queue)
+
+    socket.emit('added');
+
+    caps.emit('shipment', { parcelID, parcel })
+
+    // messages['pickup']['driver'][messageID] = message.payload
+
+    //to driver for rooms
+    // io.in('driver').emit('pickup', {messageID, payload: messages.payload})
 
     // Hub/everywhere picks up cap
-    caps.emit('pickup', payload)
+    // caps.emit('pickup', parcel)
+  })
+
+  socket.on('getall', () => {
+    console.log('Get All')
+    Object.keys(queue.shipments).forEach(id => {
+      socket.emit('shipment', 
+      { id, parcel: queue.shipments[id] })
+    })
+  })
+
+  socket.on('recieved', message => {
+    console.log('Package was recieved', message)
+    delete queue.shipments[message.id]
   })
   
   // in-transit event
