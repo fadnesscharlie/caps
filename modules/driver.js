@@ -12,10 +12,10 @@ socket.on('shipment', message => {
   socket.emit('recieved', message)
 })
 
+socket.emit('getall');
 
 socket.on('pickup', (payload) => {
   console.log('Driver picked up: ', payload.orderID)
-  socket.emit('getall');
   socket.emit('recieved', payload)
 })
   
